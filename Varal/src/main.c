@@ -4,6 +4,14 @@
 #include "driver/gpio.h"
 #include "esp_log.h"
 
+
+/*
+
+arquivo de exemplo fornecido no slide. não funciona com o nosso projeto
+
+*/
+
+
 // Definicao do pino do LED (GPIO 2)
 #define LED_PIN GPIO_NUM_2
 
