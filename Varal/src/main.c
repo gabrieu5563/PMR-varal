@@ -1,39 +1,27 @@
 #include <stdio.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
-#include "driver/gpio.h"
-#include "esp_log.h"
+#include "sensors.h"
+#include "motor.h"
+#include "rgb_led.h"
+#include "fsm.h"
 
-
-/*
-
-arquivo de exemplo fornecido no slide. não funciona com o nosso projeto
-
-*/
-
-
-// Definicao do pino do LED (GPIO 2)
-#define LED_PIN GPIO_NUM_2
-
-static const char *TAG = "MAIN";
+void fsm_task(void *pvParameters) {
+    while (1) {
+        fsm_run_iteration();
+        vTaskDelay(pdMS_TO_TICKS(500)); // Executa a FSM a cada 500ms
+    }
+}
 
 void app_main(void) {
-    // Configura o pino GPIO do LED como saida
-    gpio_reset_pin(LED_PIN);
-    gpio_set_direction(LED_PIN, GPIO_MODE_OUTPUT);
+    printf("=== Inicializando Sistema Varal Inteligente ===\n");
+    
+    // Inicialização de hardware e módulos
+    sensors_init();
+    motor_init();
+    rgb_init();
+    fsm_init();
 
-    ESP_LOGI(TAG, "--- ESP32 (ESP-IDF) Iniciado com Sucesso ---");
-
-    while (1) {
-
-        // Liga o LED
-        gpio_set_level(LED_PIN, 1);
-        ESP_LOGI(TAG, "LED Estado: LIGADO");
-        vTaskDelay(pdMS_TO_TICKS(1000));
-
-        // Desliga o LED
-        gpio_set_level(LED_PIN, 0);
-        ESP_LOGI(TAG, "LED Estado: DESLIGADO");
-        vTaskDelay(pdMS_TO_TICKS(1000));
-    }
+    // Criação da Tarefa FreeRTOS para a FSM
+    xTaskCreate(fsm_task, "fsm_task", 4096, NULL, 5, NULL);
 }
